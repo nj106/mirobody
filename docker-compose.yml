@@ -69,6 +69,8 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
       SETUP_TOKEN: ${SETUP_TOKEN}
+      OPENROUTER_CHAT_MODEL: nvidia/nemotron-3.5-super-vl:free
+      OPENROUTER_UTILS_MODEL: nvidia/nemotron-3.5-super-vl:free
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
@@ -101,6 +103,8 @@ services:
       PG_DBNAME: holistic_db
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
+      OPENROUTER_CHAT_MODEL: nvidia/nemotron-3.5-super-vl:free
+      OPENROUTER_UTILS_MODEL: nvidia/nemotron-3.5-super-vl:free
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
