@@ -68,6 +68,7 @@ services:
       PG_DBNAME: holistic_db
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
+      SETUP_TOKEN: ${SETUP_TOKEN}
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
