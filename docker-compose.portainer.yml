@@ -1,0 +1,127 @@
+# Portainer Git Stack for mirobody (adapted from upstream compose.yaml).
+# Differences from upstream:
+# - bridge network (no project network); services reach Postgres via legacy
+#   links, which work on the default bridge network.
+# - volumes carry explicit names (no project prefix).
+# - Postgres is not published to the host (internal only).
+# - SEED_DEMO_DATA=false: no public demo accounts (you@mirobody.ai / 111111).
+# - No llama service: cloud-model route; add a model key in the setup page
+#   after first start.
+# Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
+# never from this file.
+services:
+  pg:
+    image: pgvector/pgvector:0.8.6-pg17-trixie
+    container_name: mirobody_pg
+    network_mode: bridge
+    restart: unless-stopped
+    shm_size: 256mb
+    environment:
+      POSTGRES_USER: holistic_user
+      POSTGRES_DB: holistic_db
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes:
+      - mirobody_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U holistic_user -d holistic_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  mirobody_init:
+    image: thetahealth4mirobody/mirobody:1.5.8
+    container_name: mirobody_init
+    user: "0:0"
+    restart: "no"
+    network_mode: none
+    command:
+      - sh
+      - -c
+      - >-
+        find /app/.theta/mcp/upload \( ! -user mirobody -o ! -group mirobody \) -exec chown mirobody:mirobody {} +
+        || echo 'mirobody_init: could not give /app/.theta/mcp/upload to uid 10001; uploads may fail' >&2
+    volumes:
+      - mirobody_upload:/app/.theta/mcp/upload
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  mirobody:
+    image: thetahealth4mirobody/mirobody:1.5.8
+    container_name: mirobody
+    network_mode: bridge
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18060:18060"
+    environment:
+      ENV: localdb
+      PYTHONUNBUFFERED: "1"
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: "18060"
+      SEED_DEMO_DATA: "false"
+      PG_HOST: pg
+      PG_PORT: "5432"
+      PG_USER: holistic_user
+      PG_DBNAME: holistic_db
+      PG_PASSWORD: ${PG_PASSWORD}
+      JWT_KEY: ${JWT_KEY}
+      NO_PROXY: pg,localhost,127.0.0.1
+      TZ: Asia/Shanghai
+    volumes:
+      - mirobody_upload:/app/.theta/mcp/upload
+    links:
+      - "mirobody_pg:pg"
+    depends_on:
+      pg:
+        condition: service_healthy
+      mirobody_init:
+        condition: service_completed_successfully
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  mirobody_worker:
+    image: thetahealth4mirobody/mirobody:1.5.8
+    container_name: mirobody_worker
+    network_mode: bridge
+    restart: unless-stopped
+    command: ["mirobody", "worker"]
+    environment:
+      ENV: localdb
+      PYTHONUNBUFFERED: "1"
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: "18060"
+      SEED_DEMO_DATA: "false"
+      PG_HOST: pg
+      PG_PORT: "5432"
+      PG_USER: holistic_user
+      PG_DBNAME: holistic_db
+      PG_PASSWORD: ${PG_PASSWORD}
+      JWT_KEY: ${JWT_KEY}
+      NO_PROXY: pg,localhost,127.0.0.1
+      TZ: Asia/Shanghai
+    volumes:
+      - mirobody_upload:/app/.theta/mcp/upload
+    links:
+      - "mirobody_pg:pg"
+      - "mirobody:mirobody"
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 10s
+    depends_on:
+      pg:
+        condition: service_healthy
+      mirobody_init:
+        condition: service_completed_successfully
+      mirobody:
+        condition: service_healthy
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+volumes:
+  mirobody_postgres:
+    name: mirobody_postgres
+  mirobody_upload:
+    name: mirobody_upload
