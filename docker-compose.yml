@@ -7,8 +7,8 @@
 # - SEED_DEMO_DATA=false: no public demo accounts (you@mirobody.ai / 111111).
 # - Local-model trial (2026-10-28) removed 2026-10-28 per user request:
 #   llama_cpu/llama_init services, llama links/LOCAL_* vars, and
-#   mirobody_models/llama_presets volumes deleted; extraction stays on
-#   Bailian qwen-utils (model name set on the setup page; DASHSCOPE_UTILS_MODEL intentionally unset so the page can change it), chat pinned to
+#   mirobody_models/llama_presets volumes deleted; extraction on
+#   openrouter-utils (model name set on the setup page; OPENROUTER_UTILS_MODEL intentionally unset so the page can change it), chat pinned to
 #   gemini-flash via DEFAULT_MODEL. No local-model rollback remains.
 # Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
 # never from this file.
@@ -75,9 +75,9 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      UTILS_VISION_MODEL: qwen-utils
-      UTILS_TEXT_MODEL: qwen-utils
-      UTILS_OCR_MODEL: qwen-utils
+      UTILS_VISION_MODEL: openrouter-utils
+      UTILS_TEXT_MODEL: openrouter-utils
+      UTILS_OCR_MODEL: openrouter-utils
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
@@ -114,9 +114,9 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      UTILS_VISION_MODEL: qwen-utils
-      UTILS_TEXT_MODEL: qwen-utils
-      UTILS_OCR_MODEL: qwen-utils
+      UTILS_VISION_MODEL: openrouter-utils
+      UTILS_TEXT_MODEL: openrouter-utils
+      UTILS_OCR_MODEL: openrouter-utils
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
