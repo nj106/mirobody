@@ -9,6 +9,10 @@
 #   extraction surfaces (vision/text utils) point at local entries, chat stays
 #   on Google. Revert by removing the llama_cpu service and the LOCAL_* /
 #   UTILS_* vars below.
+# - Bailian trial (2026-10-28, temporary): extraction surfaces point at
+#   qwen-utils (DASHSCOPE_API_KEY in stack env), chat pinned to gemini-flash
+#   via DEFAULT_MODEL. Revert by restoring local-utils below and removing
+#   UTILS_OCR_MODEL / DEFAULT_MODEL.
 # - Portainer git stacks only place docker-compose.yml in the stack dir, so
 #   repo-relative mounts (./docker/...) resolve to empty dirs and break the
 #   preset load; the preset and chat template are fetched into a named
@@ -79,8 +83,10 @@ services:
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
       LOCAL_BASE_URL: http://llama:8080/v1
       LOCAL_OCR_BASE_URL: http://llama:8080/v1
-      UTILS_VISION_MODEL: local-utils
-      UTILS_TEXT_MODEL: local-utils
+      UTILS_VISION_MODEL: qwen-utils
+      UTILS_TEXT_MODEL: qwen-utils
+      UTILS_OCR_MODEL: qwen-utils
+      DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
@@ -118,8 +124,10 @@ services:
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
       LOCAL_BASE_URL: http://llama:8080/v1
       LOCAL_OCR_BASE_URL: http://llama:8080/v1
-      UTILS_VISION_MODEL: local-utils
-      UTILS_TEXT_MODEL: local-utils
+      UTILS_VISION_MODEL: qwen-utils
+      UTILS_TEXT_MODEL: qwen-utils
+      UTILS_OCR_MODEL: qwen-utils
+      DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
