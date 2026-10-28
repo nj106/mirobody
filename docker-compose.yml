@@ -5,20 +5,11 @@
 # - volumes carry explicit names (no project prefix).
 # - Postgres is not published to the host (internal only).
 # - SEED_DEMO_DATA=false: no public demo accounts (you@mirobody.ai / 111111).
-# - Local-model trial (2026-10-28): llama_cpu service (CPU llama.cpp) added;
-#   extraction surfaces (vision/text utils) point at local entries, chat stays
-#   on Google. Revert by removing the llama_cpu service and the LOCAL_* /
-#   UTILS_* vars below.
-# - Bailian trial (2026-10-28, temporary): extraction surfaces point at
-#   qwen-utils (DASHSCOPE_API_KEY in stack env), chat pinned to gemini-flash
-#   via DEFAULT_MODEL. Revert by restoring local-utils below and removing
-#   UTILS_OCR_MODEL / DEFAULT_MODEL.
-#   2026-10-28 16:52: model switched to qwen3.8-max via DASHSCOPE_UTILS_MODEL
-#   (was qwen3.8-flash); chat stays gemini-flash.
-# - Portainer git stacks only place docker-compose.yml in the stack dir, so
-#   repo-relative mounts (./docker/...) resolve to empty dirs and break the
-#   preset load; the preset and chat template are fetched into a named
-#   volume by llama_init instead.
+# - Local-model trial (2026-10-28) removed 2026-10-28 per user request:
+#   llama_cpu/llama_init services, llama links/LOCAL_* vars, and
+#   mirobody_models/llama_presets volumes deleted; extraction stays on
+#   Bailian qwen-utils (DASHSCOPE_UTILS_MODEL qwen3.8-max), chat pinned to
+#   gemini-flash via DEFAULT_MODEL. No local-model rollback remains.
 # Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
 # never from this file.
 services:
@@ -83,20 +74,17 @@ services:
       SETUP_TOKEN: ${SETUP_TOKEN}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      LOCAL_BASE_URL: http://llama:8080/v1
-      LOCAL_OCR_BASE_URL: http://llama:8080/v1
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
       DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
-      NO_PROXY: pg,llama,localhost,127.0.0.1
+      NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
       - "pg:pg"
-      - "llama_cpu:llama"
     depends_on:
       pg:
         condition: service_healthy
@@ -125,21 +113,18 @@ services:
       JWT_KEY: ${JWT_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      LOCAL_BASE_URL: http://llama:8080/v1
-      LOCAL_OCR_BASE_URL: http://llama:8080/v1
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
       DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
-      NO_PROXY: pg,llama,localhost,127.0.0.1
+      NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
       - "pg:pg"
       - "mirobody:mirobody"
-      - "llama_cpu:llama"
     healthcheck:
       test: ["CMD", "true"]
       interval: 10s
@@ -153,47 +138,8 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
-  llama_init:
-    image: alpine:3.21
-    container_name: llama_init
-    user: "0:0"
-    restart: "no"
-    network_mode: bridge
-    command:
-      - sh
-      - -c
-      - >-
-        mkdir -p /presets &&
-        wget -q -O /presets/local-models.ini https://raw.githubusercontent.com/nj106/mirobody/main/docker/local-models-cpu.ini &&
-        wget -q -O /presets/minicpm5-2b.jinja https://raw.githubusercontent.com/nj106/mirobody/main/docker/minicpm5-2b.jinja &&
-        sed -i 's|^chat-template-file = .*|chat-template-file = /presets/minicpm5-2b.jinja|' /presets/local-models.ini &&
-        ls -la /presets
-    volumes:
-      - llama_presets:/presets
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
-  llama_cpu:
-    image: ghcr.io/ggml-org/llama.cpp:server-b11429
-    container_name: llama_cpu
-    network_mode: bridge
-    restart: unless-stopped
-    command: ["--models-preset", "/presets/local-models.ini", "--models-max", "2", "--host", "0.0.0.0", "--port", "8080"]
-    environment:
-      LLAMA_CACHE: /models
-      TZ: Asia/Shanghai
-    volumes:
-      - llama_presets:/presets:ro
-      - mirobody_models:/models
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
 volumes:
   mirobody_postgres:
     name: mirobody_postgres
   mirobody_upload:
     name: mirobody_upload
-  mirobody_models:
-    name: mirobody_models
-  llama_presets:
-    name: llama_presets
