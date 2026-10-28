@@ -13,6 +13,8 @@
 #   qwen-utils (DASHSCOPE_API_KEY in stack env), chat pinned to gemini-flash
 #   via DEFAULT_MODEL. Revert by restoring local-utils below and removing
 #   UTILS_OCR_MODEL / DEFAULT_MODEL.
+#   2026-10-28 16:52: model switched to qwen3.8-max via DASHSCOPE_UTILS_MODEL
+#   (was qwen3.8-flash); chat stays gemini-flash.
 # - Portainer git stacks only place docker-compose.yml in the stack dir, so
 #   repo-relative mounts (./docker/...) resolve to empty dirs and break the
 #   preset load; the preset and chat template are fetched into a named
@@ -86,6 +88,7 @@ services:
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
+      DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
@@ -127,6 +130,7 @@ services:
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
+      DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
