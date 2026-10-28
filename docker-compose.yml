@@ -5,8 +5,10 @@
 # - volumes carry explicit names (no project prefix).
 # - Postgres is not published to the host (internal only).
 # - SEED_DEMO_DATA=false: no public demo accounts (you@mirobody.ai / 111111).
-# - No llama service: cloud-model route; add a model key in the setup page
-#   after first start.
+# - Local-model trial (2026-10-28): llama_cpu service (CPU llama.cpp) added;
+#   extraction surfaces (vision/text utils) point at local entries, chat stays
+#   on Google. Revert by removing the llama_cpu service and the LOCAL_* /
+#   UTILS_* vars below.
 # Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
 # never from this file.
 services:
@@ -71,12 +73,17 @@ services:
       SETUP_TOKEN: ${SETUP_TOKEN}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      NO_PROXY: pg,localhost,127.0.0.1
+      LOCAL_BASE_URL: http://llama:8080/v1
+      LOCAL_OCR_BASE_URL: http://llama:8080/v1
+      UTILS_VISION_MODEL: local-utils
+      UTILS_TEXT_MODEL: local-utils
+      NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
       - "pg:pg"
+      - "llama_cpu:llama"
     depends_on:
       pg:
         condition: service_healthy
@@ -105,13 +112,18 @@ services:
       JWT_KEY: ${JWT_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      NO_PROXY: pg,localhost,127.0.0.1
+      LOCAL_BASE_URL: http://llama:8080/v1
+      LOCAL_OCR_BASE_URL: http://llama:8080/v1
+      UTILS_VISION_MODEL: local-utils
+      UTILS_TEXT_MODEL: local-utils
+      NO_PROXY: pg,llama,localhost,127.0.0.1
       TZ: Asia/Shanghai
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
       - "pg:pg"
       - "mirobody:mirobody"
+      - "llama_cpu:llama"
     healthcheck:
       test: ["CMD", "true"]
       interval: 10s
@@ -125,8 +137,26 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
+  llama_cpu:
+    image: ghcr.io/ggml-org/llama.cpp:server-b11429
+    container_name: llama_cpu
+    network_mode: bridge
+    restart: unless-stopped
+    command: ["--models-preset", "/presets/local-models.ini", "--models-max", "2", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      LLAMA_CACHE: /models
+      TZ: Asia/Shanghai
+    volumes:
+      - ./docker/local-models-cpu.ini:/presets/local-models.ini:ro
+      - ./docker/minicpm5-2b.jinja:/app/docker/minicpm5-2b.jinja:ro
+      - mirobody_models:/models
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
 volumes:
   mirobody_postgres:
     name: mirobody_postgres
   mirobody_upload:
     name: mirobody_upload
+  mirobody_models:
+    name: mirobody_models
