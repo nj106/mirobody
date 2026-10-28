@@ -9,6 +9,10 @@
 #   extraction surfaces (vision/text utils) point at local entries, chat stays
 #   on Google. Revert by removing the llama_cpu service and the LOCAL_* /
 #   UTILS_* vars below.
+# - Portainer git stacks only place docker-compose.yml in the stack dir, so
+#   repo-relative mounts (./docker/...) resolve to empty dirs and break the
+#   preset load; the preset and chat template are fetched into a named
+#   volume by llama_init instead.
 # Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
 # never from this file.
 services:
@@ -137,6 +141,26 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
+  llama_init:
+    image: alpine:3.21
+    container_name: llama_init
+    user: "0:0"
+    restart: "no"
+    network_mode: bridge
+    command:
+      - sh
+      - -c
+      - >-
+        mkdir -p /presets &&
+        wget -q -O /presets/local-models.ini https://raw.githubusercontent.com/nj106/mirobody/main/docker/local-models-cpu.ini &&
+        wget -q -O /presets/minicpm5-2b.jinja https://raw.githubusercontent.com/nj106/mirobody/main/docker/minicpm5-2b.jinja &&
+        sed -i 's|^chat-template-file = .*|chat-template-file = /presets/minicpm5-2b.jinja|' /presets/local-models.ini &&
+        ls -la /presets
+    volumes:
+      - llama_presets:/presets
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
   llama_cpu:
     image: ghcr.io/ggml-org/llama.cpp:server-b11429
     container_name: llama_cpu
@@ -147,8 +171,7 @@ services:
       LLAMA_CACHE: /models
       TZ: Asia/Shanghai
     volumes:
-      - ./docker/local-models-cpu.ini:/presets/local-models.ini:ro
-      - ./docker/minicpm5-2b.jinja:/app/docker/minicpm5-2b.jinja:ro
+      - llama_presets:/presets:ro
       - mirobody_models:/models
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -160,3 +183,5 @@ volumes:
     name: mirobody_upload
   mirobody_models:
     name: mirobody_models
+  llama_presets:
+    name: llama_presets
