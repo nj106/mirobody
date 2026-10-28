@@ -73,6 +73,7 @@ services:
       JWT_KEY: ${JWT_KEY}
       SETUP_TOKEN: ${SETUP_TOKEN}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
@@ -111,6 +112,7 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
       GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
