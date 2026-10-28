@@ -8,7 +8,7 @@
 # - Local-model trial (2026-10-28) removed 2026-10-28 per user request:
 #   llama_cpu/llama_init services, llama links/LOCAL_* vars, and
 #   mirobody_models/llama_presets volumes deleted; extraction stays on
-#   Bailian qwen-utils (DASHSCOPE_UTILS_MODEL qwen3.8-max), chat pinned to
+#   Bailian qwen-utils (model name set on the setup page; DASHSCOPE_UTILS_MODEL intentionally unset so the page can change it), chat pinned to
 #   gemini-flash via DEFAULT_MODEL. No local-model rollback remains.
 # Secrets (PG_PASSWORD, JWT_KEY) come from the Portainer stack environment,
 # never from this file.
@@ -77,7 +77,6 @@ services:
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
-      DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
@@ -116,7 +115,6 @@ services:
       UTILS_VISION_MODEL: qwen-utils
       UTILS_TEXT_MODEL: qwen-utils
       UTILS_OCR_MODEL: qwen-utils
-      DASHSCOPE_UTILS_MODEL: qwen3.8-max
       DEFAULT_MODEL: gemini-flash
       NO_PROXY: pg,localhost,127.0.0.1
       TZ: Asia/Shanghai
