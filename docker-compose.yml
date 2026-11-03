@@ -36,7 +36,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   mirobody_init:
-    image: thetahealth4mirobody/mirobody:1.5.8
+    image: thetahealth4mirobody/mirobody:latest
     container_name: mirobody_init
     user: "0:0"
     restart: "no"
@@ -53,7 +53,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   mirobody:
-    image: thetahealth4mirobody/mirobody:1.5.8
+    image: thetahealth4mirobody/mirobody:latest
     container_name: mirobody
     network_mode: bridge
     restart: unless-stopped
@@ -94,7 +94,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   mirobody_worker:
-    image: thetahealth4mirobody/mirobody:1.5.8
+    image: thetahealth4mirobody/mirobody:latest
     container_name: mirobody_worker
     network_mode: bridge
     restart: unless-stopped
