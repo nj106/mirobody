@@ -20,14 +20,14 @@ services:
     restart: unless-stopped
     shm_size: 256mb
     environment:
-      POSTGRES_USER: holistic_user
-      POSTGRES_DB: holistic_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-      TZ: Asia/Shanghai
+      TZ: ${TZ}
     volumes:
       - mirobody_postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U holistic_user -d holistic_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 12
@@ -60,27 +60,27 @@ services:
     ports:
       - "127.0.0.1:18060:18060"
     environment:
-      ENV: localdb
+      ENV: ${ENV}
       PYTHONUNBUFFERED: "1"
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: "18060"
-      SEED_DEMO_DATA: "false"
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA}
       PG_HOST: pg
       PG_PORT: "5432"
-      PG_USER: holistic_user
-      PG_DBNAME: holistic_db
+      PG_USER: ${PG_USER}
+      PG_DBNAME: ${PG_DBNAME}
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
       SETUP_TOKEN: ${SETUP_TOKEN}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
-      GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      UTILS_VISION_MODEL: openrouter-utils
-      UTILS_TEXT_MODEL: openrouter-utils
-      UTILS_OCR_MODEL: openrouter-utils
-      DEFAULT_MODEL: gemini-flash
-      NO_PROXY: pg,localhost,127.0.0.1
-      TZ: Asia/Shanghai
+      GOOGLE_UTILS_MODEL: ${GOOGLE_UTILS_MODEL}
+      UTILS_VISION_MODEL: ${UTILS_VISION_MODEL}
+      UTILS_TEXT_MODEL: ${UTILS_TEXT_MODEL}
+      UTILS_OCR_MODEL: ${UTILS_OCR_MODEL}
+      DEFAULT_MODEL: ${DEFAULT_MODEL}
+      NO_PROXY: ${NO_PROXY}
+      TZ: ${TZ}
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
@@ -100,26 +100,26 @@ services:
     restart: unless-stopped
     command: ["mirobody", "worker"]
     environment:
-      ENV: localdb
+      ENV: ${ENV}
       PYTHONUNBUFFERED: "1"
       HTTP_HOST: 0.0.0.0
       HTTP_PORT: "18060"
-      SEED_DEMO_DATA: "false"
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA}
       PG_HOST: pg
       PG_PORT: "5432"
-      PG_USER: holistic_user
-      PG_DBNAME: holistic_db
+      PG_USER: ${PG_USER}
+      PG_DBNAME: ${PG_DBNAME}
       PG_PASSWORD: ${PG_PASSWORD}
       JWT_KEY: ${JWT_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
-      GOOGLE_UTILS_MODEL: gemini-3.5-flash-lite
-      UTILS_VISION_MODEL: openrouter-utils
-      UTILS_TEXT_MODEL: openrouter-utils
-      UTILS_OCR_MODEL: openrouter-utils
-      DEFAULT_MODEL: gemini-flash
-      NO_PROXY: pg,localhost,127.0.0.1
-      TZ: Asia/Shanghai
+      GOOGLE_UTILS_MODEL: ${GOOGLE_UTILS_MODEL}
+      UTILS_VISION_MODEL: ${UTILS_VISION_MODEL}
+      UTILS_TEXT_MODEL: ${UTILS_TEXT_MODEL}
+      UTILS_OCR_MODEL: ${UTILS_OCR_MODEL}
+      DEFAULT_MODEL: ${DEFAULT_MODEL}
+      NO_PROXY: ${NO_PROXY}
+      TZ: ${TZ}
     volumes:
       - mirobody_upload:/app/.theta/mcp/upload
     links:
